@@ -1,30 +1,40 @@
-from UI import Drawer, Button, Col, RawCol, Row, Card, Input, openLink, AddSpace, Label
-from backend import all_chats
+from UI import Drawer, Button, Col, RawCol, Row, Card, Input, openLink, AddSpace, Label, confirm
+from backend import all_chats, delete_chat
 import env
 import utils
 
-async def Create_Side_Bar(chat_creator=None, chat_opener=None, loader=None):
+async def Create_Side_Bar(chat_creator=None, chat_opener=None, loader=None, empty=None):
     drawer = Drawer().classes("bg-surface")
     tokenizer, model, tm = await loader() # type:ignore
     def open_chat(chat):
-        if chat_opener: 
-            chat_opener(chat['id'], dict(model=model, tokenizer=tokenizer), ListChats)
+        if chat_opener: chat_opener(chat['id'], dict(model=model, tokenizer=tokenizer), ListChats)
     def create_chat():
-        if chat_creator: 
-            chat_creator(dict(model=model, tokenizer=tokenizer), ListChats)
-            ListChats()
+        if chat_creator: chat_creator(dict(model=model, tokenizer=tokenizer), ListChats)
+        ListChats()
+    def del_chat(c):
+        confirm(f"Are you sure you want to delete the chat `{c['title']}` forever? This is not reversible!",
+            on_yes=lambda: [delete_chat(c['id']), ListChats(), empty() if empty else None])
     def ListChats(e=None):
-        query = search.value.lower().strip() # type:ignore
+        query = search.value.lower().strip()  # type:ignore
         chats.clear()
         with chats:
             for chat in all_chats(query):
-                g20 = len(chat.get('title',''))>20
-                print(chat)
-                with Button(text=chat.get('title', '')[:g20*20 + (not g20)*len(chat.get('title', ''))] + '...'*g20, on_click=lambda c=chat: open_chat(c))\
-                    .props(f'icon="message" color="btn-secondary" align="left"')\
-                    .classes(f"w-full"):
-                        env.ui.tooltip(f"Last update on {utils.time_ago(chat.get('last_update'))}")\
-                .props('anchor="center end" self="center middle"')
+                g20 = len(chat.get('title','')) > 20
+                title = chat.get('title', '')
+                short_title = title[:g20*20 + (not g20)*len(title)] + '...'*g20
+                with Row().classes("w-full items-center justify-between relative group"):
+                    Button(
+                        text=short_title,
+                        on_click=lambda c=chat: open_chat(c)
+                    ).props('icon="message" color="btn-secondary" align="left"').classes("w-full flex-1 text-left")
+                    Button(
+                        config=dict(icon='delete_forever'),
+                        on_click=lambda c=chat: del_chat(c)
+                    ).props('dense rounded color="negative"').classes(
+                        """absolute right-1 text-xs opacity-0 group-hover:opacity-100
+                        transition-opacity duration-200"""
+                    )
+    
     with drawer:
         with RawCol().classes("w-full h-full flex flex-col"):
             with Card().classes("w-full h-fit mb-1 bg-primary"):

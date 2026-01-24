@@ -3,7 +3,7 @@ from datetime import datetime
 import uuid
 
 CHAT_FILE = "chats.json"
-
+CONFIG_FILE = "config.json"
 def read_chats() -> dict:
     try:
         with open(CHAT_FILE, 'r', encoding='utf-8') as f:
@@ -12,6 +12,15 @@ def read_chats() -> dict:
         with open(CHAT_FILE, 'w', encoding='utf-8') as f:
             json.dump({}, f)
         return {}
+
+def read_config() -> dict:
+    try:
+        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9}, f)
+        return {"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9}
 
 def create_chat(title: str = '') -> dict:
     chats = read_chats()
@@ -64,3 +73,15 @@ def rename_chat(chat_id: str, new_title: str):
     chats[chat_id]['last_update'] = datetime.now().isoformat()
     with open(CHAT_FILE, 'w', encoding='utf-8') as f:
         json.dump(chats, f, indent=2, ensure_ascii=False)
+
+def delete_chat(chat_id):
+    chats = read_chats()
+    if chat_id not in chats:
+        raise ValueError(f"Chat ID {chat_id} does not exist")
+    deleted_chat = chats.pop(chat_id)
+    with open(CHAT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(chats, f, indent=2, ensure_ascii=False)
+    return {
+        'id': chat_id,
+        'chat': deleted_chat
+    }

@@ -1,6 +1,6 @@
 import torch, time, asyncio
 from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteria, StoppingCriteriaList
-
+from backend import read_config
 model_id = "./models"
 processing = lambda label: f"""<div style="
     display: flex;
@@ -39,16 +39,16 @@ processing = lambda label: f"""<div style="
 
 def _load_model_sync():
     start = time.time()
-    # tokenizer = AutoTokenizer.from_pretrained(
-    #     model_id,
-    # )
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     model_id,
-    #     device_map="auto",
-    #     max_memory={"cpu": "16GB"},  # adjust based on your RAM
-    #     torch_dtype=torch.float32,
-    # )
-    return "tokenizer", "model", time.time() - start
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id,
+    )
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        device_map="auto",
+        max_memory={"cpu": "16GB"},  # adjust based on your RAM
+        torch_dtype=torch.float32,
+    )
+    return tokenizer, model, time.time() - start
 
 async def loadModel():
     return await asyncio.to_thread(_load_model_sync)
@@ -178,7 +178,7 @@ def initialize_model_stream(tokenizer, model, msgs=None):
             return_dict=True,
             return_tensors="pt"
         )#.to(model.device)
-        box.set_content(processing("Definig Criteria..."))
+        box.set_content(processing("Defining Criteria..."))
 
         stopping_criteria = StoppingCriteriaList([StreamCallback(tokenizer, token_callback, stop_flag)])
         box.set_content(processing("Generating Response..."))
@@ -196,21 +196,20 @@ def initialize_model_stream(tokenizer, model, msgs=None):
         messages.append({"role": "assistant", "content": reply})
         return reply
 
-    async def chat_stream(user_input, token_callback=None, stop_flag=None,
-                          max_new_tokens=5000, temperature=0.7, top_p=0.9, box=None):
+    async def chat_stream(user_input, token_callback=None, stop_flag=None, box=None):
 
         if stop_flag is None:
             stop_flag = {"stop": False}
-
+        config = read_config()
         reply = await asyncio.to_thread(
             _generate_stream,
             user_input,
-            max_new_tokens,
-            temperature,
-            top_p,
-            token_callback,
-            stop_flag,
-            box
+            max_new_tokens=config.get("max_new_tokens", 5000),
+            temperature=config.get("temperature", 0.7),
+            top_p=config.get("top_p", 0.9),
+            token_callback=token_callback,
+            stop_flag=stop_flag,
+            box=box
         )
         return reply
 

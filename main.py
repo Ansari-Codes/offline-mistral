@@ -31,9 +31,67 @@ async def page():
     async def LoadModel():
         loading = Loading("Loading Models...")
         _ = await loadModel() #type:ignore
-        loading.delete()
+        loading.delete() #type:ignore
         return _
 
+    def emtpy():
+        chat_area.clear()
+        with chat_area:
+            empty_state = ui.html("""
+                <style>
+                .empty-wrap {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 16px;
+                    padding: 40px;
+                    border-radius: 20px;
+                    text-align: center;
+                    background: linear-gradient(
+                        135deg,
+                        #7dd3fc,
+                        #2563eb
+                    );
+                    color: white;
+                    animation: float 4s ease-in-out infinite;
+                    box-shadow: 0 20px 40px rgba(37,99,235,0.35);
+                    max-width: 420px;
+                }
+
+                @keyframes float {
+                    0%,100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                .empty-title {
+                    font-size: 1.6rem;
+                    font-weight: bold;
+                }
+
+                .empty-sub {
+                    font-size: 0.95rem;
+                    opacity: 0.9;
+                }
+
+                .empty-hint {
+                    font-size: 0.85rem;
+                    opacity: 0.8;
+                }
+                </style>
+
+                <div class="empty-wrap">
+                    <div class="empty-title">No conversation yet 💬</div>
+                    <div class="empty-sub">
+                        Your AI assistant is ready and waiting.
+                    </div>
+                    <div class="empty-hint">
+                        Type a message below to get started ✨
+                    </div>
+                </div>
+                """, 
+            sanitize=lambda x:x)
+    
     def openChat(id, models, lister):
         chat_area.clear()
         msgs = get_messages(id)
@@ -48,8 +106,8 @@ async def page():
         assistant = initialize_model_stream(**models, msgs=[])
         with chat_area: CreateChatArea(created_chat['id'], assistant, lister)
 
-    await side_bar.Create_Side_Bar(createChat, openChat, LoadModel)
-    chat_area = ui.element().classes("w-full h-full flex")
-
+    await side_bar.Create_Side_Bar(createChat, openChat, LoadModel, emtpy)
+    chat_area = ui.element().classes("w-full h-full flex items-center justify-center")
+    emtpy()
 # app.on_disconnect(lambda: [app.shutdown(), exit()])
 ui.run(reload=True, native=True)

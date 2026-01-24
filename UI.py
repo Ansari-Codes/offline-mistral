@@ -150,12 +150,21 @@ def Logger():
 
 def confirm(statement="", on_yes=None, on_no=None):
     d = Dialog().props("persistent")
+    def yes():
+        if on_yes: on_yes()
+        d.delete()  # close the dialog after yes
+
+    def no():
+        if on_no: on_no()
+        else: d.delete()  # close if no function is not provided
+
     with d:
         with Card():
             Label(statement).classes("text-md font-semibold")
             with Row():
-                Button("Yes", config=dict(icon='check'), on_click=on_yes)
-                Button("No", config=dict(icon='close'), on_click=on_no or d.delete)
+                Button("Yes", config=dict(icon='check'), color="positive", on_click=yes)
+                Button("No", config=dict(icon='close'), color="negative", on_click=no)
+    d.open()  # make sure the dialog actually opens
     return d
 
 def navBar(icon = "", links:dict|None = None, bkp="sm"):
