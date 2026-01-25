@@ -5,7 +5,9 @@ import dialogs
 
 async def Create_Side_Bar(chat_creator=None, chat_opener=None, loader=None, empty=None):
     drawer = Drawer().classes("bg-surface")
-    tokenizer, model, tm = await loader() # type:ignore
+    (tokenizer, model, tm), model_loaded = await loader() # type:ignore
+    if not model_loaded:
+        return None, None, None
     def open_chat(chat):
         if chat_opener: chat_opener(chat['id'], dict(model=model, tokenizer=tokenizer), ListChats)
     def create_chat():
@@ -64,4 +66,4 @@ async def Create_Side_Bar(chat_creator=None, chat_opener=None, loader=None, empt
                 on_click=lambda:(),
                 config={'icon':'info'}
             ).classes("w-full mb-2")
-    return drawer
+    return drawer, ListChats, create_chat

@@ -4,6 +4,7 @@ from chat_area import CreateChatArea
 from ai import initialize_model_stream, loadModel
 from utils import Loading
 from backend import get_messages, create_chat
+from UI import Dialog, Icon, Label, Card, RawCol, Row, Col, Button
 
 @ui.page('/')
 async def page():
@@ -28,75 +29,42 @@ async def page():
     }
     ui.colors(**AI_BLUE)
     await ui.context.client.connected()
-    async def LoadModel():
-        loading = Loading("Loading Models...")
-        _ = await loadModel() #type:ignore
-        loading.delete() #type:ignore
-        return _
-
-    def emtpy():
+    error_occured = {"error": False}
+    def onError(e):
         chat_area.clear()
         with chat_area:
-            empty_state = ui.html("""
-                <style>
-                .empty-wrap {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 16px;
-                    padding: 40px;
-                    border-radius: 20px;
-                    text-align: center;
-                    background: linear-gradient(
-                        135deg,
-                        #7dd3fc,
-                        #2563eb
-                    );
-                    color: white;
-                    animation: float 4s ease-in-out infinite;
-                    box-shadow: 0 20px 40px rgba(37,99,235,0.35);
-                    max-width: 420px;
-                }
-
-                @keyframes float {
-                    0%,100% { transform: translateY(0); }
-                    50% { transform: translateY(-10px); }
-                }
-
-                .empty-title {
-                    font-size: 1.6rem;
-                    font-weight: bold;
-                }
-
-                .empty-sub {
-                    font-size: 0.95rem;
-                    opacity: 0.9;
-                }
-
-                .empty-hint {
-                    font-size: 0.85rem;
-                    opacity: 0.8;
-                }
-                </style>
-
-                <div class="empty-wrap">
-                    <div class="empty-title">No conversation yet 💬</div>
-                    <div class="empty-sub">
-                        Your AI assistant is ready and waiting.
-                    </div>
-                    <div class="empty-hint">
-                        Type a message below to get started ✨
-                    </div>
-                </div>
-                """, 
-            sanitize=lambda x:x)
+            with RawCol().classes("w-full h-fit bg-surface rounded-md text-left leading-loose text-negative p-3 gap-1"):
+                Label("Cannot Load the Model").classes("w-full h-fit text-xl font-bold")
+                Label(str(e)).classes("w-full h-fit capitalize text-lg")
+        error_occured.update({"error":True})
+    async def LoadModel():
+        loading = Loading("Loading Models...")
+        try:
+            _ = await loadModel() #type:ignore
+            loading.delete() #type:ignore
+            return _, True
+        except Exception as e:
+            loading.delete() # type:ignore
+            onError(e)
+            return (None, None, None), False
     
+    def empty():
+        if list(error_occured.values())[0]: return
+        chat_area.clear()
+        with chat_area:
+            with Row().classes("justify-center items-center h-[95vh]"):
+                with Col().classes("items-center justify-center gap-4 max-w-xl h-fit"):
+                    with Card().classes("w-full bg-primary text-white shadow-lg rounded-xl flex flex-col items-center gap-4"):
+                        Label("No conversation yet").classes("text-2xl font-bold text-center")
+                        Label("Your AI assistant is ready and waiting.").classes("text-base opacity-90 text-center")
+                        with Row():
+                            Button("New Chat", on_click=creator, color='accent')
+                            Button("Read Docs", on_click=lambda: print("Open docs clicked"), color='accent')
+
     def openChat(id, models, lister):
         chat_area.clear()
         msgs = get_messages(id)
-        if len(msgs) > 10:
-            msgs = msgs[-10:]
+        if len(msgs) > 10: msgs = msgs[-10:]
         assistant = initialize_model_stream(**models, msgs=msgs)
         with chat_area: CreateChatArea(id, assistant, lister)
 
@@ -105,9 +73,10 @@ async def page():
         created_chat = create_chat()
         assistant = initialize_model_stream(**models, msgs=[])
         with chat_area: CreateChatArea(created_chat['id'], assistant, lister)
-
-    await side_bar.Create_Side_Bar(createChat, openChat, LoadModel, emtpy)
+    
     chat_area = ui.element().classes("w-full h-full flex items-center justify-center")
-    emtpy()
+    _, _, creator = await side_bar.Create_Side_Bar(createChat, openChat, LoadModel, empty)
+    empty()
+
 # app.on_disconnect(lambda: [app.shutdown(), exit()])
 ui.run(reload=True, native=True)

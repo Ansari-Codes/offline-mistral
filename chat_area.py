@@ -254,7 +254,7 @@ def UserChatBox(chat_id: str, assistant=None, container:ui.element|None=None, sc
                         """
                     )
                     stp_btn.set_visibility(False)
-            Label("You have to verify AI responses — they can assist, but may not always be fully accurate.").classes("mt-2 text-xs font-light text-gray-500")
+            Label("You have to verify AI responses — they can assist, but may not always be fully accurate.").classes("mt-2 text-xs font-light text-muted_text")
 
 
 def CreateChatArea(chat_id: str, assistant=None, lister=None):
