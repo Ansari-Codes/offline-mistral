@@ -9,9 +9,9 @@ async def Create_Side_Bar(chat_creator=None, chat_opener=None, loader=None, empt
     if not model_loaded:
         return None, None, None
     def open_chat(chat):
-        if chat_opener: chat_opener(chat['id'], dict(model=model, tokenizer=tokenizer), ListChats)
+        if chat_opener: chat_opener(chat['id'], dict(model=model, tokenizer=tokenizer), ListChats, drawer)
     def create_chat():
-        if chat_creator: chat_creator(dict(model=model, tokenizer=tokenizer), ListChats)
+        if chat_creator: chat_creator(dict(model=model, tokenizer=tokenizer), ListChats, drawer)
         ListChats()
     def del_chat(c):
         confirm(f"Are you sure to delete the chat `{c['title']}` forever? This is not reversible!",

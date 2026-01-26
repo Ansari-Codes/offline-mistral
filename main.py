@@ -62,22 +62,24 @@ async def page():
                             Button("New Chat", on_click=creator, color='accent')
                             Button("Read Docs", on_click=dialogs.docs, color='accent')
 
-    def openChat(id, models, lister):
+    def openChat(id, models, lister, drawer):
         chat_area.clear()
         msgs = get_messages(id)
         if len(msgs) > 10: msgs = msgs[-10:]
         assistant = initialize_model_stream(**models, msgs=msgs)
-        with chat_area: CreateChatArea(id, assistant, lister)
+        with chat_area: CreateChatArea(id, assistant, lister, drawer)
 
-    def createChat(models, lister):
+    def createChat(models, lister, drawer):
         chat_area.clear()
         created_chat = create_chat()
         assistant = initialize_model_stream(**models, msgs=[])
-        with chat_area: CreateChatArea(created_chat['id'], assistant, lister)
+        with chat_area: CreateChatArea(created_chat['id'], assistant, lister, drawer)
     
     chat_area = ui.element().classes("w-full h-full flex items-center justify-center")
     _, _, creator = await side_bar.Create_Side_Bar(createChat, openChat, LoadModel, empty)
     empty()
 
-# app.on_disconnect(lambda: [app.shutdown(), exit()])
-ui.run(reload=True, native=True)
+app.on_disconnect(lambda: [app.shutdown(), exit()])
+import os
+PORT = os.getenv("PORT", 8080)
+ui.run(reload=False, port=62343)

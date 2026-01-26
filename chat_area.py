@@ -1,5 +1,5 @@
 from env import ui, app
-from UI import TextArea, Input, Button, RawRow, RawCol, Row, Col, Card, Label, Html, Notify
+from UI import TextArea, Input, Button, RawRow, RawCol, Row, Col, Card, Label, Html, Notify, AddSpace
 from backend import read_chats, write_message, rename_chat
 
 def message(msg, ai=False):
@@ -30,17 +30,20 @@ def message(msg, ai=False):
                     text-xs
                     """
                 )
-
-                m = ui.markdown(
-                    msg
-                    .replace("\\[", "$$").replace("\\]", "$$")
-                    .replace("\\(", "$").replace("\\)", "$")
-                    # .replace("\n\n", "<br>")
-                    # .replace("\n", "<br>"),
-                    ,
-                    extras=["fenced-code-blocks", "tables", "mermaid", "latex"]
-                ).classes("p-0 m-0 q-markdown")
-
+                if ai:
+                    m = ui.markdown(
+                        msg
+                        .replace("\\[", "$$").replace("\\]", "$$")
+                        .replace("\\(", "$").replace("\\)", "$")
+                        # .replace("\n\n", "<br>")
+                        # .replace("\n", "<br>"),
+                        ,
+                        extras=["fenced-code-blocks", "tables", "mermaid", "latex"]
+                    ).classes("p-0 m-0 q-markdown")
+                else:
+                    m = Html(
+                        msg,
+                    ).classes("p-0 m-0")
     return c, card, m
 
 def TitleChat(chat_id: str, lister, drawer=None):
@@ -60,17 +63,16 @@ def TitleChat(chat_id: str, lister, drawer=None):
         editing["mode"] = False
         update_ui()
     def update_ui():
-        container.clear()
-        if editing["mode"]:
-            with container:
-                with RawRow().classes("max-w-[1000px] w-full bg-secondary p-2 rounded-full gap-2 border-2 border-[var(--q-primary)]"):
+        contianer.clear()
+        with contianer:
+            if editing["mode"]:
+                with RawRow().classes("max-w-[1000px] w-full bg-secondary p-2 rounded-full gap-1 border-2 border-[var(--q-primary)]"):
                     nonlocal title_input
                     title_input = Input(value=title).classes("bg-secondary flex flex-1 rounded-full").props("rounded")
                     Button(config={"icon": "check"}, on_click=confirm_edit).classes(
                         "bg-positive text-white p-1 text-xs"
                     ).props('dense rounded')
-        else:
-            with container:
+            else:
                 with RawRow().classes("max-w-[1000px] group w-full bg-secondary p-2 px-3 rounded-full gap-2 items-center border-2 border-[var(--q-primary)]"):
                     Label(title).classes("w-fit flex flex-1 text-lg font-medium")
                     Button(config={"icon": "edit"}, on_click=activate_edit).classes(
@@ -82,8 +84,11 @@ def TitleChat(chat_id: str, lister, drawer=None):
                         text-xs
                         """
                     )
-    with ui.page_sticky('top-left', x_offset=20, y_offset=20).classes("w-fit") as container:
-        title_input = None
+    with ui.page_sticky('top-left', x_offset=20, y_offset=20, expand=True):
+        with RawRow().classes("w-full gap-2"):
+            Button(config={"icon":"menu"}, color="primary", on_click=drawer.toggle).props("dense").classes("p-2 w-fit h-fit")
+            contianer = RawRow().classes("flex flex-1")
+            title_input = None
         update_ui()
 
 def ChatArea(chat_id: str):
@@ -261,8 +266,8 @@ def UserChatBox(chat_id: str, assistant=None, container:ui.element|None=None, sc
             Label("You have to verify AI responses — they can assist, but may not always be fully accurate.").classes("mt-2 text-xs font-light text-muted_text")
 
 
-def CreateChatArea(chat_id: str, assistant=None, lister=None):
+def CreateChatArea(chat_id: str, assistant=None, lister=None, drawer=None):
     """Create the entire chat area, including title, messages, and input box."""
     container, scroller, nol = ChatArea(chat_id)
-    TitleChat(chat_id, lister)
+    TitleChat(chat_id, lister, drawer)
     UserChatBox(chat_id, assistant, container, scroller, nol)
