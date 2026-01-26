@@ -8,13 +8,13 @@ This software was created with one question in mind: **"Can we create an offline
 
 Companies like OpenAI, Google, or DeepSeek run **massive, multi-billion parameter models** on high-end hardware. Running such models on a regular PC is challenging as the result is shown in fig:
 
-<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmkyeDN2empjcjhocGZtdDNidmI1c3l6aW5uZ2h0cGdwY3lpNWJidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/XrNry0aqYWEhi/giphy.gif">An Image Showing Bomb Blast</img> 😥😯
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmkyeDN2empjcjhocGZtdDNidmI1c3l6aW5uZ2h0cGdwY3lpNWJidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/XrNry0aqYWEhi/giphy.gif" alt="An Image Showing Bomb Blast></img> 😥😯
 
 So, I used:
 
 1. **Qwen2.5-0.5B**: <a href="https://huggingface.co/Qwen/Qwen2.5-0.5B" target="_blank">Hugging Face</a>
 
-   *Small enough to run on **16GB RAM** and general CPU machines.
+   * Small enough to run on **16GB RAM** and general CPU machines.
    * Tested and working -- trust me!
 
 2. **NiceGUI**: <a href="https://nicegui.io" target="_blank">Website</a>
@@ -70,14 +70,14 @@ You can tweak parameters to get outputs **exactly the way you like**. The adjust
 
 ### Recommended Settings for Different Cases
 
-| Use Case                          | Temperature | Top_p      | Max New Tokens | Notes                           |
+| Use Case                          | Temperature | Top p      | Max New Tokens | Notes                           |
 | --------------------------------- | ----------- | ---------- | -------------- | ------------------------------- |
 | Quick & Precise Answers           | 0.1 – 0.3   | 0.8        | 50 – 100       | Factual answers or coding help  |
 | Casual Chat / Fun                 | 0.6 – 0.8   | 0.9        | 100 – 200      | Adds personality and variety    |
 | Creative Writing / Brainstorming  | 0.8 – 1.0   | 0.95 – 1.0 | 200 – 500      | Explore ideas freely            |
 | Detailed Explanations / Summaries | 0.3 – 0.5   | 0.9        | 200 – 300      | Balanced creativity and clarity |
 
-**Tip:** Adjust **temperature**, **top_p**, and **max_new_tokens** together to get the exact style and length you want.
+**Tip:** Adjust **temperature**, **top\_p**, and **max\_new\_tokens** together to get the exact style and length you want.
 
 
 ## Help
@@ -117,7 +117,8 @@ def createSettings():
 def docs():
     docs_dialog = Dialog()
     docs_dialog.props('persistent')
-    with docs_dialog, Card().classes("w-full h-full max-w-[90vw] max-h-[90vh] sm:max-w-[50vw] sm:max-h-[50vh]"):
+    with (docs_dialog.classes("w-full h-full max-w-[90vw] max-h-[90vh] sm:max-w-[50vw] sm:max-h-[50vh]")
+    , Card().classes("w-full h-full")):
         with Row().classes("w-full"):
             Icon('book', "lg", "primary")
             Label("Docs").classes("text-2xl font-bold text-primary")
