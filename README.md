@@ -28,6 +28,8 @@ I am currently (2026) a **1st Year ICS student at KIPS College**, Punjab - Pakis
 
 ## Setup
 
+##### You should have python-3.9 or earlier. Development was done using python-3.10.
+
 #### Clone this repo:
 ```bash
 git clone https://github.com/Ansari-Codes/offline-assistant.git
