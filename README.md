@@ -1,4 +1,6 @@
-![logo](https://github.com/Ansari-Codes/offline-assistant/blob/main/images/logo.PNG?raw=true)
+![preview](https://github.com/Ansari-Codes/offline-assistant/blob/main/images/Capture.PNG?raw=true)
+![preview2](https://github.com/Ansari-Codes/offline-assistant/blob/main/images/Capture2.PNG?raw=true)
+
 # 🤖 Qwen On Desktop (QOD)
 
 This software was created with one question in mind: **"Can we create an offline chatbot utility?"**
@@ -47,6 +49,8 @@ Doesn’t work reliably:
 It might answer “It is 40°C in Siberia” 😅 -- always **verify critical information**.
 
 ## Settings
+
+![settigns](https://github.com/Ansari-Codes/offline-assistant/blob/main/images/Capture3.PNG?raw=true)
 
 You can tweak parameters to get outputs **exactly the way you like**. The adjustable parameters are:
 
