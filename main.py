@@ -2,7 +2,7 @@ from nicegui import ui, app
 import side_bar
 from chat_area import CreateChatArea
 from ai import initialize_model_stream, loadModel
-from utils import Loading
+from utils import Loading, get_free_port
 from backend import get_messages, create_chat
 from UI import Dialog, Icon, Label, Card, RawCol, Row, Col, Button
 import dialogs
@@ -80,6 +80,6 @@ async def page():
     empty()
 
 app.on_disconnect(lambda: [app.shutdown(), exit()])
-import os
-PORT = os.getenv("PORT", 8080)
-ui.run(reload=False, port=62343)
+try: port = get_free_port()
+except: port = 8080
+ui.run(reload=False, port=port)

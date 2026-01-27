@@ -1,5 +1,6 @@
 from datetime import datetime
 from env import ui
+import socket
 
 def time_ago(ts):
     now = datetime.now()
@@ -25,3 +26,10 @@ def Loading(text=None, spinner={"type":"box", "size": "lg", "color":"primary"}, 
     if rs == 'r': return r
     elif rs == 'rh': return r,h
     return r,h
+
+def get_free_port():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port

@@ -5,12 +5,12 @@ from pathlib import Path
 import os
 
 def exists():
-    app_dir = Path.home() / ".my_app"
+    app_dir = Path.home() / ".qod"
     app_dir.mkdir(parents=True, exist_ok=True)
     config_file = app_dir / "config.json"
     chat_file = app_dir / "chats.json"
     if not config_file.exists():
-        config_file.write_text(json.dumps({}, indent=2))
+        config_file.write_text(json.dumps({"top_p": 0.8, "temperature": 0.9, "max_new_tokens": 2048, "custom_instructions": ""}, indent=2))
         try:
             os.chmod(config_file, 0o644)
         except Exception:
@@ -40,8 +40,8 @@ def read_config() -> dict:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         with open(cgf, 'w', encoding='utf-8') as f:
-            json.dump({"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9}, f)
-        return {"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9}
+            json.dump({"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9, "custom_instructions": ""}, f)
+        return {"max_new_tokens": 1000, "temperature": 0.7, "top_p":0.9, "custom_instructions":""}
 
 def write_config(config: dict) -> None:
     cgf, _ = exists()

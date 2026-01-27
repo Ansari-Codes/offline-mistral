@@ -196,11 +196,15 @@ def UserChatBox(chat_id: str, assistant=None, container:ui.element|None=None, sc
                     last_card.classes("bg-ai-msg")
                 except Exception as e:
                     last_text += f"\n##### An Error Occured While Generation: \n**{str(e)}**"
-                    last_container.set_content(last_text)
+                    last_container.set_content(last_text
+                    .replace("\\[", "$$").replace("\\]", "$$")
+                    .replace("\\(", "$").replace("\\)", "$"))
                     last_card.classes("bg-negative text-white")
                 write_message(chat_id, assistant_msg=last_text)
-                scroller.scroll_to(percent=100, axis='vertical')
-                last_container.set_content(last_text)
+                scroller.scroll_to(percent=100, axis='vertical') # pyright: ignore[reportOptionalMemberAccess]
+                last_container.set_content(last_text
+                    .replace("\\[", "$$").replace("\\]", "$$")
+                    .replace("\\(", "$").replace("\\)", "$"))
         finally:
             stp_btn.set_visibility(False)
             snd_btn.set_visibility(True)

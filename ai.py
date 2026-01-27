@@ -1,6 +1,7 @@
 import torch, time, asyncio
 from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteria, StoppingCriteriaList
 from backend import read_config
+
 model_id = "./models"
 processing = lambda label: f"""<div style="
     display: flex;
@@ -45,75 +46,13 @@ def _load_model_sync():
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map="auto",
-        max_memory={"cpu": "16GB"},  # adjust based on your RAM
+        max_memory={"cpu": "16GB"},
         torch_dtype=torch.float32,
     )
     return tokenizer, model, time.time() - start
 
 async def loadModel(onerror=None):
     return await asyncio.to_thread(_load_model_sync)
-# def initialize_model(tokenizer, model, msgs=None):
-
-#     messages = [
-#         {
-#             "role": "system",
-#             "content": (
-#                 "You are Offline-Assistant, created by Muhammad Abubakar Siddique Ansari. "
-#                 "You are created to assist users when there is no internet available. "
-#                 "You are helpful and concise."
-#             )
-#         }
-#     ]
-
-#     if msgs:
-#         for m in msgs:
-#             role, msg = list(m.items())[0]
-#             messages.append({
-#                 "role": role.lower(),
-#                 "content": msg
-#             })
-
-#     def _generate(user_input, max_new_tokens, temperature, top_p):
-#         """Blocking model generation (runs in worker thread)"""
-#         messages.append({"role": "user", "content": user_input})
-
-#         inputs = tokenizer.apply_chat_template(
-#             messages,
-#             add_generation_prompt=True,
-#             tokenize=True,
-#             return_dict=True,
-#             return_tensors="pt",
-#         ).to(model.device)
-
-#         start = time.time()
-#         with torch.no_grad():
-#             output = model.generate(
-#                 **inputs,
-#                 max_new_tokens=max_new_tokens,
-#                 temperature=temperature,
-#                 top_p=top_p,
-#             )
-#         elapsed = time.time() - start
-
-#         reply = tokenizer.decode(
-#             output[0][inputs["input_ids"].shape[-1]:],
-#             skip_special_tokens=True
-#         )
-
-#         messages.append({"role": "assistant", "content": reply})
-#         return reply, elapsed
-
-#     async def chat(user_input, max_new_tokens=512, temperature=0.7, top_p=0.9):
-#         reply, elapsed = await asyncio.to_thread(
-#             _generate,
-#             user_input,
-#             max_new_tokens,
-#             temperature,
-#             top_p
-#         )
-#         return reply, elapsed
-
-#     return chat
 
 def initialize_model_stream(tokenizer, model, msgs=None):
     messages = [
@@ -126,7 +65,6 @@ def initialize_model_stream(tokenizer, model, msgs=None):
         }
     ]
 
-    # Preload previous messages
     if msgs:
         for i,m in enumerate(msgs):
             role, msg = list(m.items())[0]
@@ -140,16 +78,15 @@ def initialize_model_stream(tokenizer, model, msgs=None):
 
         def __call__(self, input_ids, *args, **kwargs):
             if self.stop_flag["stop"]:
-                return True  # immediately stop generation
-            # decode last token
+                return True
             last_token_id = input_ids[0, -1]
             text = self.tokenizer.decode(last_token_id, skip_special_tokens=True)
             if self.token_callback:
                 self.token_callback(text)
-            return False  # continue generating
+            return False
 
     def _generate_stream(user_input, max_new_tokens=5000, temperature=0.7, top_p=0.9,
-                         token_callback=None, stop_flag=None, box=None):
+                         token_callback=None, stop_flag=None, box=None, custom_instructions=""):
         """
         Blocking token-by-token generation (run in worker thread)
         """
@@ -161,15 +98,22 @@ def initialize_model_stream(tokenizer, model, msgs=None):
         SYSTEM = {
             "role": "system",
             "content": (
-                "You are Offline-Assistant, created by Muhammad Abubakar Siddique Ansari. "
-                "You assist users when offline. Be concise and helpful."
-            )
+                """You are Offline-Assistant, created by Muhammad Abubakar Siddique Ansari.
+You assist users when offline. Be concise and helpful."
+Give me clear, structured, and actionable answers
+Be brutally honest don’t sugarcoat or over-agree.
+Challenge my thinking if I’m wrong.
+Point out flaws, gaps, and weak assumptions.
+Don’t give generic advice or motivational fluff.
+Explain things simply, clearly, and directly.
+If something is missing, say it clearly.
+Optimize for clarity, accuracy, and usefulness, not politeness."""
+            ) + custom_instructions
         }
         HISTORY = msgss[1:]
         HISTORY = HISTORY[-(MAX_TURNS * 2):]
         msgss = [SYSTEM] + HISTORY
 
-        # Apply chat template
         box.set_content(processing("Understanding Inputs..."))
         inputs = tokenizer.apply_chat_template(
             msgss,
@@ -177,7 +121,7 @@ def initialize_model_stream(tokenizer, model, msgs=None):
             tokenize=True,
             return_dict=True,
             return_tensors="pt"
-        )#.to(model.device)
+        )
         box.set_content(processing("Defining Criteria..."))
 
         stopping_criteria = StoppingCriteriaList([StreamCallback(tokenizer, token_callback, stop_flag)])
@@ -191,7 +135,6 @@ def initialize_model_stream(tokenizer, model, msgs=None):
                 stopping_criteria=stopping_criteria
             )
 
-        # Decode full output
         reply = tokenizer.decode(output[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
         messages.append({"role": "assistant", "content": reply})
         return reply
@@ -209,7 +152,8 @@ def initialize_model_stream(tokenizer, model, msgs=None):
             top_p=config.get("top_p", 0.9),
             token_callback=token_callback,
             stop_flag=stop_flag,
-            box=box
+            box=box,
+            custom_instructions=config.get("custom_instructions", ""),
         )
         return reply
 

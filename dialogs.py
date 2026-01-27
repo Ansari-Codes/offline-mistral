@@ -1,4 +1,4 @@
-from UI import Dialog, confirm, Label, Button, Input, Select, Card, Row, Col, Slider, Icon, AddSpace, Html, openLink
+from UI import Dialog, confirm, Label, Button, Input, Select, TextArea, Card, Row, Col, Slider, Icon, AddSpace, Html, openLink
 from backend import write_config, read_config
 from env import ui
 doc_string = """
@@ -105,6 +105,8 @@ def createSettings():
             with Row().classes("w-full"):
                 Label("Max New Tokens").classes("w-fit font-bold text-lg")
                 Slider(128, 8000, 1, onchange=lambda e: edited.update({"max_new_tokens": int(e.value)})).props('label-always').classes("flex flex-1").set_value(config.get("max_new_tokens"))
+            with ui.expansion("Custom Instructions").classes("w-full justify-start"):
+                TextArea(edited.get("custom_instructions", ""), max_h="600px").on_value_change(lambda e: edited.update({"custom_instructions": e.value})).classes("w-full")
         def save():
             config.update(edited)
             write_config(edited)

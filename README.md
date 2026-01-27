@@ -19,9 +19,9 @@ So, I used:
 
 ## Developer
 
-Since there’s no one to introduce me, I’ll do it myself. I am **Muhammad Abubakar Siddique Ansari**, passionate about **Data Science and AI**. I love creating utilities and solving problems.
+I am **Muhammad Abubakar Siddique Ansari**, passionate about **Data Science and AI**. I love creating utilities and solving problems.
 
-I am currently (2026) a **1st Year ICS student at KIPS College**. You can learn more about me at my portfolio: [Portfolio](https://ansari-codes.github.io/portfolio).
+I am currently (2026) a **1st Year ICS student at KIPS College**, Punjab - Pakistan. You can learn more about me at my portfolio: [Portfolio](https://ansari-codes.github.io/portfolio).
 
 ## Use Case
 
@@ -78,4 +78,6 @@ You can tweak parameters to get outputs **exactly the way you like**. The adjust
 
 ## Help
 
-If you encounter problems or find a bug, please **open an issue on the repo**: [GitHub Issues](https://github.com/Ansari-Codes/offline-assistant/issues).
+If you encounter problems or find a bug, please **open an issue on the repo**: [GitHub Issues](https://github.com/Ansari-Codes/offline-assistant/issues). 
+
+**Contact me at email: ansaricodes@gmail.com**
