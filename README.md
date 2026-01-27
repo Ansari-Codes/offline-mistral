@@ -26,6 +26,32 @@ I am **Muhammad Abubakar Siddique Ansari**, passionate about **Data Science and 
 
 I am currently (2026) a **1st Year ICS student at KIPS College**, Punjab - Pakistan. You can learn more about me at my portfolio: [Portfolio](https://ansari-codes.github.io/portfolio).
 
+## Setup
+
+#### Clone this repo:
+```bash
+git clone https://github.com/Ansari-Codes/offline-assistant.git
+cd offline-assistant
+```
+
+#### Install the requirements:
+```bash
+pip install -U pip #optional
+pip install -r requirements.txt
+```
+
+#### Download the model files
+Download all the files from this link: https://huggingface.co/Qwen/Qwen2.5-0.5B
+When I downloaded, I got these files:
+<img width="375" height="246" alt="file structure" src="https://github.com/user-attachments/assets/38933519-70eb-4f25-9d41-c802b16e79c3" />
+
+Place those downloaded models right files under `models/` folder premade in the folder `offline-assistant`. (Don't rename anything!)
+
+#### Start the server:
+```bash
+python -m main
+```
+
 ## Use Case
 
 QOD is suitable for **general-purpose assistance**, especially when you don’t have access to online chatbots. You can use it for:
